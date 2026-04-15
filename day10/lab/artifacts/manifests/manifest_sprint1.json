@@ -1,10 +1,6 @@
 {
   "run_id": "sprint1",
-<<<<<<< HEAD
-  "run_timestamp": "2026-04-15T05:23:39.313765+00:00",
-=======
-  "run_timestamp": "2026-04-15T05:37:02.422808+00:00",
->>>>>>> 869b4d48a2f93ccaf8fc06fde4c5ea10553dbed0
+  "run_timestamp": "2026-04-15T07:44:34.827541+00:00",
   "raw_path": "data\\raw\\policy_export_dirty.csv",
   "raw_records": 10,
   "cleaned_records": 6,
