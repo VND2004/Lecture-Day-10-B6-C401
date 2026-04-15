@@ -3,7 +3,7 @@
 
 version: "1.0"
 dataset: "kb_chunk_export"
-owner_team: "__TODO__"
+owner_team: "Clean/Quality Team"
 
 schema_cleaned:
   chunk_id:
@@ -27,16 +27,38 @@ schema_cleaned:
     required: true
 
 quality_rules:
-  - id: "no_duplicate_chunk_text"
-    severity: "warn"
-  - id: "no_stale_refund_window"
+  - id: "min_one_row"
+    severity: "halt"
+  - id: "no_empty_doc_id"
+    severity: "halt"
+  - id: "doc_id_in_docs_allowlist"
+    description: "Bắt buộc doc_id phải nằm trong danh mục tài liệu ở data/docs"
+    severity: "halt"
+  - id: "refund_no_stale_14d_window"
     description: "Không được để chunk policy refund chứa cửa sổ 14 ngày (lệch so với v4 = 7 ngày)"
+    severity: "halt"
+  - id: "chunk_min_length_8"
+    severity: "warn"
+  - id: "effective_date_iso_yyyy_mm_dd"
+    description: "Ngày hiệu lực phải đúng định dạng parser regex YYYY-MM-DD"
+    severity: "halt"
+  - id: "effective_date_calendar_valid"
+    description: "Ngày hiệu lực phải là ngày hợp lệ theo lịch thực tế"
+    severity: "halt"
+  - id: "exported_not_before_effective"
+    description: "Thời điểm xuất file (exported_at) không được xảy ra trước ngày hiệu lực văn bản"
+    severity: "halt"
+  - id: "chunk_text_normalized_format"
+    description: "Text phải sạch: không có thẻ HTML, phân dòng CRLF, dấu cách thừa"
+    severity: "halt"
+  - id: "hr_leave_no_stale_10d_annual"
+    description: "Policy nhân sự không được chứa số liệu phép năm cũ (10 ngày)"
     severity: "halt"
 
 freshness:
   measured_at: "publish"  # ingest | cleaned | publish
   sla_hours: 24
-  alert_channel: "__TODO__"
+  alert_channel: "#oncall-data-latency"
 
 canonical_sources:
   - path: "data/docs/policy_refund_v4.txt"
