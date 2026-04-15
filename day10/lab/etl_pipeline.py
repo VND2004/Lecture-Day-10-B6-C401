@@ -32,8 +32,8 @@ from transform.cleaning_rules import clean_rows, load_raw_csv, write_cleaned_csv
 load_dotenv()
 
 ROOT = Path(__file__).resolve().parent
-# RAW_DEFAULT = ROOT / "data" / "raw" / "policy_export_dirty_add_extra.csv"
-RAW_DEFAULT = ROOT / "data" / "raw" / "policy_export_dirty.csv"
+RAW_DEFAULT = ROOT / "data" / "raw" / "policy_export_dirty_add_extra.csv"
+# RAW_DEFAULT = ROOT / "data" / "raw" / "policy_export_dirty.csv"
 ART = ROOT / "artifacts"
 LOG_DIR = ART / "logs"
 MAN_DIR = ART / "manifests"
