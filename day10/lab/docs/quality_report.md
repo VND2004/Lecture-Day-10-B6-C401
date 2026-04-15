@@ -50,29 +50,38 @@ Chi tiết expectations khi inject-bad:
 ## 2. Before / after retrieval
 
 File đính kèm:
-- `artifacts/eval/after_inject_bad.csv` — trạng thái sau inject (dữ liệu bẩn)
-- `artifacts/eval/after_clean_good.csv` — trạng thái sau clean (dữ liệu sạch)
+- `artifacts/eval/after_inject_bad.csv` — eval golden (top-k=3) sau inject
+- `artifacts/eval/after_clean_good.csv` — eval golden (top-k=3) sau clean
+- `artifacts/eval/grading_run_inject_bad.jsonl` — grading thực tế (top-k=5) sau inject
+- `artifacts/eval/grading_run.jsonl` — grading thực tế (top-k=5) sau clean
 
-### Câu hỏi then chốt: refund window (`q_refund_window`)
+### Grading thực tế (top-k=5) — so sánh inject vs clean
 
-| Scenario | top1_doc_id | contains_expected | hits_forbidden |
-|----------|-------------|-------------------|----------------|
-| Trước (inject-bad) | policy_refund_v4 | yes | no |
-| Sau (clean-good) | policy_refund_v4 | yes | no |
+| id | Question | hits_forbidden (inject) | hits_forbidden (clean) | Nhận xét |
+|----|----------|------------------------|----------------------|---------|
+| gq_d10_01 | Refund window — bao nhiêu ngày? | **true** | false | Chunk "14 ngày làm việc" lọt vào top-5 khi inject |
+| gq_d10_02 | Ticket P1 resolution SLA? | false | false | Không bị ảnh hưởng |
+| gq_d10_03 | Nhân viên <3 năm được bao nhiêu ngày phép? | **true** | false | Chunk HR cũ "10 ngày phép" lọt vào top-5 khi inject |
 
-> Ghi chú: chunk "14 ngày làm việc" được embed vào collection khi inject, nhưng chunk "7 ngày làm việc" vẫn score cao hơn ở top-1 do semantic similarity. Tuy nhiên chunk stale vẫn tồn tại trong top-k và có thể gây nhiễu context cho LLM downstream.
+> Grading dùng top-k=5 (rộng hơn eval golden top-k=3) nên phát hiện được chunk stale ở `gq_d10_01` mà eval golden bỏ sót — đúng tinh thần observability "context vẫn còn chunk stale dù top-1 nhìn đúng".
 
-### Merit: versioning HR — `q_leave_version`
+### Câu hỏi then chốt: refund window (`gq_d10_01`)
 
-| Scenario | top1_doc_id | contains_expected | hits_forbidden | top1_doc_expected |
-|----------|-------------|-------------------|----------------|-------------------|
-| Trước (inject-bad) | hr_leave_policy | yes | **yes** | yes |
-| Sau (clean-good) | hr_leave_policy | yes | **no** | yes |
+| Scenario | top1_doc_id | contains_expected | hits_forbidden | top_k |
+|----------|-------------|-------------------|----------------|-------|
+| Trước (inject-bad) | policy_refund_v4 | true | **true** | 5 |
+| Sau (clean-good) | policy_refund_v4 | true | false | 5 |
 
-**Phân tích:** Đây là bằng chứng rõ nhất của Sprint 3. Khi `--no-cleaning-rules`:
-- Chunk HR cũ "10 ngày phép năm" (effective_date < 2026-01-01) không bị quarantine → lọt vào embed
-- `hits_forbidden=yes` — chunk stale xuất hiện trong top-k, nhiễu retrieval
-- Sau khi pipeline sạch chạy lại: `hr_stale_filter` loại chunk cũ → `hits_forbidden=no`
+Chunk "14 ngày làm việc" không bị fix do `--no-cleaning-rules` → embed vào collection → xuất hiện trong top-5 context. Sau clean: `refund_window_fix` đổi thành "7 ngày" + `embed_prune_removed` xóa chunk cũ → `hits_forbidden=false`.
+
+### Merit: versioning HR — `gq_d10_03`
+
+| Scenario | top1_doc_id | contains_expected | hits_forbidden | top1_doc_matches | top_k |
+|----------|-------------|-------------------|----------------|-----------------|-------|
+| Trước (inject-bad) | hr_leave_policy | true | **true** | true | 5 |
+| Sau (clean-good) | hr_leave_policy | true | false | true | 5 |
+
+Khi `--no-cleaning-rules`: chunk HR cũ "10 ngày phép năm" (effective_date=2025-01-01) không bị quarantine → lọt vào embed → `hits_forbidden=true`. Sau clean: `hr_stale_filter` loại chunk → `hits_forbidden=false`. `top1_doc_matches=true` cả hai scenario vì doc_id đúng, nhưng context bị nhiễu bởi version cũ.
 
 ---
 
@@ -114,7 +123,7 @@ Tắt toàn bộ 8 cleaning rules, bao gồm:
 
 ## 5. Hạn chế & việc chưa làm
 
-- `q_refund_window` chưa thể hiện `hits_forbidden=yes` rõ ràng vì chunk "7 ngày" có semantic score cao hơn "14 ngày" — cần thêm câu hỏi golden hoặc tăng top-k để expose chunk stale trong context
+- `q_refund_window` ở eval golden (top-k=3) không thấy `hits_forbidden=yes`, nhưng grading thực tế (top-k=5) đã phát hiện — cho thấy top-k nhỏ có thể che khuất chunk stale trong context
 - Freshness check chỉ dựa trên `latest_exported_at` trong manifest, chưa kết nối watermark DB thực tế
 - Chưa có LLM-judge để đánh giá chất lượng câu trả lời end-to-end (chỉ keyword-based)
 - Data contract `contracts/data_contract.yaml` chưa được điền đầy đủ owner và SLA nguồn
