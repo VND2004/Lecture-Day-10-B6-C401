@@ -1,7 +1,7 @@
 # Báo Cáo Cá Nhân — Lab Day 10: Data Pipeline & Observability
 
 **Họ và tên:** Vũ Như Đức  
-**Vai trò:** Ingestion / Raw Data Owner  
+**Vai trò:** Raw Data and Quality Owner  
 **Ngày nộp:** 2026-04-15  
 **Độ dài yêu cầu:** **400–650 từ**
 
