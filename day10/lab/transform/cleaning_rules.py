@@ -10,6 +10,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -25,6 +26,7 @@ ALLOWED_DOC_IDS = frozenset(
 
 _ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _DMY_SLASH = re.compile(r"^(\d{2})/(\d{2})/(\d{4})$")
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
 
 
 def _norm_text(s: str) -> str:
@@ -45,12 +47,59 @@ def _normalize_effective_date(raw: str) -> Tuple[str, str]:
     if not s:
         return "", "empty_effective_date"
     if _ISO_DATE.match(s):
+        # Rule name: effective_date_iso_calendar_valid
+        # ISO đúng pattern nhưng phải là ngày tồn tại trong lịch thực.
+        try:
+            datetime.strptime(s, "%Y-%m-%d")
+        except ValueError:
+            return "", "invalid_effective_date_calendar"
         return s, ""
     m = _DMY_SLASH.match(s)
     if m:
         dd, mm, yyyy = m.group(1), m.group(2), m.group(3)
-        return f"{yyyy}-{mm}-{dd}", ""
+        try:
+            dt = datetime.strptime(f"{yyyy}-{mm}-{dd}", "%Y-%m-%d")
+            return dt.strftime("%Y-%m-%d"), ""
+        except ValueError:
+            return "", "invalid_effective_date_calendar"
     return "", "invalid_effective_date_format"
+
+
+def _parse_exported_at(raw: str) -> datetime | None:
+    """
+    Parse exported_at sang UTC datetime để so sánh chronology.
+
+    Chấp nhận một số format phổ biến trong lab:
+    - ISO 8601 có timezone hoặc 'Z'
+    - ISO 8601 không timezone (coi là UTC)
+    - Unix epoch (giây)
+    - dd/mm/YYYY HH:MM:SS và YYYY/mm/dd HH:MM:SS
+    """
+    s = (raw or "").strip()
+    if not s:
+        return None
+
+    if s.isdigit():
+        try:
+            return datetime.fromtimestamp(int(s), tz=timezone.utc)
+        except (OverflowError, ValueError):
+            return None
+
+    iso_candidate = s.replace("Z", "+00:00")
+    try:
+        dt = datetime.fromisoformat(iso_candidate)
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    except ValueError:
+        pass
+
+    for fmt in ("%d/%m/%Y %H:%M:%S", "%Y/%m/%d %H:%M:%S"):
+        try:
+            return datetime.strptime(s, fmt).replace(tzinfo=timezone.utc)
+        except ValueError:
+            continue
+    return None
 
 
 def load_raw_csv(path: Path) -> List[Dict[str, str]]:
