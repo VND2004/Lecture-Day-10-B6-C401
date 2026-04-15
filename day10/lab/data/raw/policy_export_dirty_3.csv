@@ -1,0 +1,16 @@
+chunk_id,doc_id,chunk_text,effective_date,exported_at
+11,shipping_policy_v2,"Thời gian giao hàng tiêu chuẩn là 3-5 ngày làm việc.",2026-03-01,2026-04-12T10:00:00
+12,shipping_policy_v2,Giao hàng siêu tốc trong 24h, áp dụng cho nội thành,2026-03-01,2026-04-12T10:00:00
+13,N/A,"Lỗi hệ thống khi cập nhật phí ship",NULL,2026-04-12T10:00:00
+14,SHIPPING_POLICY_V2 ,"  Phí ship ngoại thành là 50k ", 2026-03-01 ,     2026-04-12T10:00:00   
+15,return_policy,"Khách hàng chịu phí trả hàng",Quý 1 năm 2026,2026-04-12T10:00:00
+16,return_policy,"Hàng đổi trả phải:
+- Còn nguyên tem
+- Chưa qua sử dụng",2026-03-01,2026-04-12T10:00:00
+17,warranty_info,"Bảo hành 12 tháng cho lỗi nhà sản xuất.",2026-01-15,1712887200
+17,warranty_info,"Pin được bảo hành 6 tháng.",2026-01-15,2026-04-12T10:00:00+07:00
+19,doc_promo,"<p>Giảm 20% cho <b>đơn hàng đầu tiên</b>.</p>",2026-04-01,2026-04-12T10:00:00
+20,doc_promo,"Gim gi ln n 50% dp l.",2026-04-01,2026-04-12T10:00:00
+21,doc_extra,"Dữ liệu có số lượng cột nhiều hơn bình thường",2026-04-01,2026-04-12T10:00:00,ExtraInfo1,ExtraInfo2
+,doc_missing_id,"Dòng này bị thiếu chunk_id ở đầu",2026-04-01,2026-04-12T10:00:00
+23,doc_invalid_date,"Ngày phi logic",2026-02-30,2026-04-12T10:00:00
