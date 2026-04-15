@@ -1,0 +1,25 @@
+{
+  "run_id": "clean-good",
+  "run_timestamp": "2026-04-15T09:52:07.445626+00:00",
+  "raw_path": "data\\raw\\policy_export_dirty_add_extra.csv",
+  "raw_records": 13,
+  "cleaned_records": 7,
+  "quarantine_records": 6,
+  "latest_exported_at": "2026-04-15T08:00:00",
+  "cleaning_rules_enabled": {
+    "doc_id_allowlist": true,
+    "effective_date_cleaning": true,
+    "required_field_check": true,
+    "hr_stale_filter": true,
+    "text_normalization": true,
+    "chronology_check": true,
+    "dedupe": true,
+    "refund_window_fix": true
+  },
+  "no_cleaning_rules": false,
+  "no_refund_fix": false,
+  "skipped_validate": false,
+  "cleaned_csv": "artifacts\\cleaned\\cleaned_clean-good.csv",
+  "chroma_path": "./chroma_db",
+  "chroma_collection": "day10_kb"
+}
