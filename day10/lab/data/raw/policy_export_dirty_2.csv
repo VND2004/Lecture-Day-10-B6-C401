@@ -1,0 +1,11 @@
+chunk_id,doc_id,chunk_text,effective_date,exported_at
+1,policy_refund_v4,"Yêu cầu hoàn tiền được gửi trong vòng 7 ngày làm việc kể từ xác nhận đơn và phải kèm mã ticket.",2026-02-30,2026-04-15T07:30:00
+2,sla_p1_2026,"Ticket P1: phản hồi 15 phút, resolution 4 giờ, update stakeholder mỗi 30 phút.",2026-01-15,2026/04/15 08:00:00
+3,it_helpdesk_faq,"VPN tối đa 2 thiết bị cùng lúc cho mỗi tài khoản.",2026-01-20,
+4,hr_leave_policy,OK,2026-01-01,2026-04-15T08:05:00
+5,policy_refund_v4,"Ticket P1 tự động escalate lên Senior Engineer nếu không có phản hồi trong 10 phút.",2026-02-01,2026-04-15T08:06:00
+6,sla_p1_2026,"Log tạm thời chứa lệnh: SELECT * FROM incidents WHERE severity='P1'; cần được redaction trước publish.",2026-01-15,2026-04-15T08:07:00
+7,hr_leave_policy,"Nhân viên sau probation có thể remote tối đa 2 ngày/tuần và phải onsite Thứ 3, Thứ 5.",2026-01-01,2025-12-31T23:59:59
+8,it_helpdesk_faq,"Mật khẩu phải đổi mỗi 90 ngày và hệ thống sẽ nhắc trước 7 ngày.",2026-01-20,3026-01-01T00:00:00
+9,sla_p1_2026,"Hotline on-call ext. 9999 hoạt động 24/7 cho sự cố P1.",2026-01-15,2026-04-15T08:09:00
+10,policy_refund_v4,"Hoàn tiền qua store credit có thể đạt 110% giá trị đơn khi khách hàng chọn phương án credit.",2026-02-01,2026-04-15T08:10:00.123+07:00
