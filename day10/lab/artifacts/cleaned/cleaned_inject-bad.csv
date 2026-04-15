@@ -1,0 +1,16 @@
+chunk_id,doc_id,chunk_text,effective_date,exported_at
+policy_refund_v4_1_3b11f30cc4b49d25,policy_refund_v4,Yêu cầu được gửi trong vòng 7 ngày làm việc kể từ thời điểm xác nhận đơn hàng.,2026-02-01,2026-04-10T08:00:00
+policy_refund_v4_2_47faa15a860cb59d,policy_refund_v4,Yêu cầu được gửi trong vòng 7 ngày làm việc kể từ thời điểm xác nhận đơn hàng.,2026-02-01,2026-04-10T08:00:00
+policy_refund_v4_3_7a24bf5a0997b635,policy_refund_v4,Yêu cầu hoàn tiền được chấp nhận trong vòng 14 ngày làm việc kể từ xác nhận đơn (ghi chú: bản sync cũ policy-v3 — lỗi migration).,2026-02-01,2026-04-10T08:00:00
+sla_p1_2026_4_182f5a289bdf01da,sla_p1_2026,Ticket P1 có SLA phản hồi ban đầu 15 phút và resolution trong 4 giờ.,2026-02-01,2026-04-10T08:00:00
+policy_refund_v4_5_10ec65afd0fdc636,policy_refund_v4,,,2026-04-10T08:00:00
+it_helpdesk_faq_6_a9bea9068df47503,it_helpdesk_faq,Tài khoản bị khóa sau 5 lần đăng nhập sai liên tiếp.,2026-02-01,2026-04-10T08:00:00
+hr_leave_policy_7_d36316107448f8d5,hr_leave_policy,Nhân viên dưới 3 năm kinh nghiệm được 10 ngày phép năm (bản HR 2025).,2025-01-01,2026-04-10T08:00:00
+hr_leave_policy_8_affa46632573444f,hr_leave_policy,Nhân viên dưới 3 năm kinh nghiệm được 12 ngày phép năm theo chính sách 2026.,2026-02-01,2026-04-10T08:00:00
+legacy_catalog_xyz_zzz_9_822748bf1a2ea39b,legacy_catalog_xyz_zzz,Chunk nội dung đủ dài để vượt ngưỡng expectation độ dài tối thiểu trong cleaned export.,2026-02-01,2026-04-10T08:00:00
+it_helpdesk_faq_10_9f2663ad4519fe9c,it_helpdesk_faq,FAQ bổ sung: đổi mật khẩu qua portal self-service có thể mất tối đa 24 giờ để đồng bộ toàn hệ thống.,01/02/2026,2026-04-10T08:00:00
+policy_refund_v4_11_53655bb4e8bc0504,policy_refund_v4,"<p>  Hoàn tiền áp dụng trong 7 ngày làm việc kể từ lúc xác nhận đơn.  </p>
+
+Yêu cầu phải có mã ticket hợp lệ.",2026-02-01,2026-04-15T08:00:00
+policy_refund_v4_12_4422813cf6d7044a,policy_refund_v4,Yêu cầu hoàn tiền được gửi trong vòng 7 ngày làm việc kể từ xác nhận đơn và phải kèm mã ticket.,2026-02-30,2026-04-15T08:10:00
+hr_leave_policy_13_6957c62d8f5b6ace,hr_leave_policy,"Nhân viên sau probation có thể remote tối đa 2 ngày/tuần và phải onsite Thứ 3, Thứ 5.",2026-01-01,2025-12-31T23:59:59
