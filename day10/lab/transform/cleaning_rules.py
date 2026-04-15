@@ -102,6 +102,26 @@ def _parse_exported_at(raw: str) -> datetime | None:
     return None
 
 
+def _normalize_chunk_text(text: str) -> str:
+    """
+    Rule name: normalize_chunk_text_format_noise
+
+    Chuẩn hóa format chunk_text:
+    - strip HTML tags
+    - normalize whitespace dư
+    - giữ newline nội dung nhưng chuẩn hóa về '\n'
+    """
+    raw = (text or "").replace("\r\n", "\n").replace("\r", "\n")
+    no_html = _HTML_TAG_RE.sub(" ", raw)
+
+    lines = []
+    for line in no_html.split("\n"):
+        compact = " ".join(line.split())
+        if compact:
+            lines.append(compact)
+    return "\n".join(lines).strip()
+
+
 def load_raw_csv(path: Path) -> List[Dict[str, str]]:
     rows: List[Dict[str, str]] = []
     with path.open(encoding="utf-8", newline="") as f:
@@ -123,7 +143,9 @@ def clean_rows(
     1) Quarantine: doc_id không thuộc allowlist (export lạ / catalog sai).
     2) Chuẩn hoá effective_date sang YYYY-MM-DD; quarantine nếu không parse được.
     3) Quarantine: chunk hr_leave_policy có effective_date < 2026-01-01 (bản HR cũ / conflict version).
-    4) Quarantine: chunk_text rỗng hoặc effective_date rỗng sau chuẩn hoá.
+    4) Normalize chunk_text: strip HTML, chuẩn hoá whitespace/newline.
+    5) Quarantine: chunk_text rỗng hoặc effective_date rỗng sau chuẩn hoá.
+    6) Quarantine: chronology lỗi khi exported_at < effective_date.
     5) Loại trùng nội dung chunk_text (giữ bản đầu).
     6) Fix stale refund: policy_refund_v4 chứa '14 ngày làm việc' → 7 ngày.
     """
@@ -149,6 +171,9 @@ def clean_rows(
         if eff_err == "invalid_effective_date_format":
             quarantine.append({**raw, "reason": eff_err, "effective_date_raw": eff_raw})
             continue
+        if eff_err == "invalid_effective_date_calendar":
+            quarantine.append({**raw, "reason": eff_err, "effective_date_raw": eff_raw})
+            continue
 
         if doc_id == "hr_leave_policy" and eff_norm < "2026-01-01":
             quarantine.append(
@@ -163,6 +188,21 @@ def clean_rows(
         if not text:
             quarantine.append({**raw, "reason": "missing_chunk_text"})
             continue
+
+        # Rule name: exported_before_effective_date
+        # Nếu parse được exported_at và exported_at < effective_date thì quarantine.
+        exported_dt = _parse_exported_at(exported_at)
+        if exported_dt is not None:
+            effective_dt = datetime.strptime(eff_norm, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            if exported_dt < effective_dt:
+                quarantine.append(
+                    {
+                        **raw,
+                        "reason": "exported_before_effective_date",
+                        "effective_date_normalized": eff_norm,
+                    }
+                )
+                continue
 
         key = _norm_text(text)
         if key in seen_text:
