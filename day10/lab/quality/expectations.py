@@ -9,8 +9,11 @@ from __future__ import annotations
 import re
 from datetime import datetime, timezone
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
+
+DOCS_DIR = Path(__file__).resolve().parents[1] / "data" / "docs"
 
 @dataclass
 class ExpectationResult:
@@ -18,6 +21,13 @@ class ExpectationResult:
     passed: bool
     severity: str  # "warn" | "halt"
     detail: str
+
+
+def _allowed_doc_ids_from_docs() -> set[str]:
+    """Use data/docs/*.txt filenames as the source catalog for valid doc_id values."""
+    if not DOCS_DIR.is_dir():
+        return set()
+    return {p.stem for p in DOCS_DIR.glob("*.txt") if p.is_file()}
 
 
 def _parse_exported_at(raw: str) -> datetime | None:
@@ -81,6 +91,22 @@ def run_expectations(cleaned_rows: List[Dict[str, Any]]) -> Tuple[List[Expectati
     )
 
     # E3: policy refund không được chứa cửa sổ sai 14 ngày (sau khi đã fix)
+    allowed_doc_ids = _allowed_doc_ids_from_docs()
+    unknown_doc = [
+        r
+        for r in cleaned_rows
+        if allowed_doc_ids and (r.get("doc_id") or "").strip() not in allowed_doc_ids
+    ]
+    ok_allowlist = len(unknown_doc) == 0
+    results.append(
+        ExpectationResult(
+            "doc_id_in_docs_allowlist",
+            ok_allowlist,
+            "halt",
+            f"unknown_doc_id_count={len(unknown_doc)} allowed_doc_ids={sorted(allowed_doc_ids)}",
+        )
+    )
+
     bad_refund = [
         r
         for r in cleaned_rows

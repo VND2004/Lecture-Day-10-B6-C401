@@ -21,6 +21,7 @@ ALLOWED_DOC_IDS = frozenset(
         "sla_p1_2026",
         "it_helpdesk_faq",
         "hr_leave_policy",
+        "access_control_sop",
     }
 )
 
@@ -134,6 +135,13 @@ def load_raw_csv(path: Path) -> List[Dict[str, str]]:
 def clean_rows(
     rows: List[Dict[str, str]],
     *,
+    apply_doc_id_allowlist: bool = True,
+    apply_effective_date_cleaning: bool = True,
+    apply_required_field_check: bool = True,
+    apply_hr_stale_filter: bool = True,
+    apply_text_normalization: bool = True,
+    apply_chronology_check: bool = True,
+    apply_dedupe: bool = True,
     apply_refund_window_fix: bool = True,
 ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     """
@@ -160,22 +168,29 @@ def clean_rows(
         eff_raw = raw.get("effective_date", "")
         exported_at = raw.get("exported_at", "")
 
-        if doc_id not in ALLOWED_DOC_IDS:
+        if apply_doc_id_allowlist and doc_id not in ALLOWED_DOC_IDS:
             quarantine.append({**raw, "reason": "unknown_doc_id"})
             continue
 
-        eff_norm, eff_err = _normalize_effective_date(eff_raw)
-        if eff_err == "empty_effective_date":
-            quarantine.append({**raw, "reason": "missing_effective_date"})
-            continue
-        if eff_err == "invalid_effective_date_format":
-            quarantine.append({**raw, "reason": eff_err, "effective_date_raw": eff_raw})
-            continue
-        if eff_err == "invalid_effective_date_calendar":
-            quarantine.append({**raw, "reason": eff_err, "effective_date_raw": eff_raw})
-            continue
+        eff_norm = eff_raw
+        if apply_effective_date_cleaning:
+            eff_norm, eff_err = _normalize_effective_date(eff_raw)
+            if eff_err == "empty_effective_date":
+                quarantine.append({**raw, "reason": "missing_effective_date"})
+                continue
+            if eff_err == "invalid_effective_date_format":
+                quarantine.append({**raw, "reason": eff_err, "effective_date_raw": eff_raw})
+                continue
+            if eff_err == "invalid_effective_date_calendar":
+                quarantine.append({**raw, "reason": eff_err, "effective_date_raw": eff_raw})
+                continue
 
-        if doc_id == "hr_leave_policy" and eff_norm < "2026-01-01":
+        if (
+            apply_hr_stale_filter
+            and doc_id == "hr_leave_policy"
+            and _ISO_DATE.match(eff_norm)
+            and eff_norm < "2026-01-01"
+        ):
             quarantine.append(
                 {
                     **raw,
@@ -185,30 +200,45 @@ def clean_rows(
             )
             continue
 
-        if not text:
+        if apply_text_normalization:
+            text = _normalize_chunk_text(text)
+
+        if apply_required_field_check and not eff_norm:
+            quarantine.append({**raw, "reason": "missing_effective_date"})
+            continue
+
+        if apply_required_field_check and not text:
             quarantine.append({**raw, "reason": "missing_chunk_text"})
             continue
 
         # Rule name: exported_before_effective_date
         # Nếu parse được exported_at và exported_at < effective_date thì quarantine.
-        exported_dt = _parse_exported_at(exported_at)
-        if exported_dt is not None:
-            effective_dt = datetime.strptime(eff_norm, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-            if exported_dt < effective_dt:
-                quarantine.append(
-                    {
-                        **raw,
-                        "reason": "exported_before_effective_date",
-                        "effective_date_normalized": eff_norm,
-                    }
-                )
-                continue
+        if apply_chronology_check:
+            exported_dt = _parse_exported_at(exported_at)
+            if exported_dt is not None:
+                try:
+                    effective_dt = datetime.strptime(eff_norm, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                except ValueError:
+                    effective_dt = None
+            else:
+                effective_dt = None
+            if exported_dt is not None and effective_dt is not None:
+                if exported_dt < effective_dt:
+                    quarantine.append(
+                        {
+                            **raw,
+                            "reason": "exported_before_effective_date",
+                            "effective_date_normalized": eff_norm,
+                        }
+                    )
+                    continue
 
-        key = _norm_text(text)
-        if key in seen_text:
-            quarantine.append({**raw, "reason": "duplicate_chunk_text"})
-            continue
-        seen_text.add(key)
+        if apply_dedupe:
+            key = _norm_text(text)
+            if key in seen_text:
+                quarantine.append({**raw, "reason": "duplicate_chunk_text"})
+                continue
+            seen_text.add(key)
 
         fixed_text = text
         if apply_refund_window_fix and doc_id == "policy_refund_v4":

@@ -32,7 +32,8 @@ from transform.cleaning_rules import clean_rows, load_raw_csv, write_cleaned_csv
 load_dotenv()
 
 ROOT = Path(__file__).resolve().parent
-RAW_DEFAULT = ROOT / "data" / "raw" / "policy_export_dirty_add_extra.csv"
+# RAW_DEFAULT = ROOT / "data" / "raw" / "policy_export_dirty_add_extra.csv"
+RAW_DEFAULT = ROOT / "data" / "raw" / "policy_export_dirty.csv"
 ART = ROOT / "artifacts"
 LOG_DIR = ART / "logs"
 MAN_DIR = ART / "manifests"
@@ -66,9 +67,29 @@ def cmd_run(args: argparse.Namespace) -> int:
     log(f"run_id={run_id}")
     log(f"raw_records={raw_count}")
 
+    disable_all_cleaning = bool(args.no_cleaning_rules)
+    cleaning_rules_enabled = {
+        "doc_id_allowlist": not (disable_all_cleaning or args.no_doc_allowlist),
+        "effective_date_cleaning": not (disable_all_cleaning or args.no_effective_date_cleaning),
+        "required_field_check": not (disable_all_cleaning or args.no_required_field_check),
+        "hr_stale_filter": not (disable_all_cleaning or args.no_hr_stale_filter),
+        "text_normalization": not (disable_all_cleaning or args.no_text_normalization),
+        "chronology_check": not (disable_all_cleaning or args.no_chronology_check),
+        "dedupe": not (disable_all_cleaning or args.no_dedupe),
+        "refund_window_fix": not (disable_all_cleaning or args.no_refund_fix),
+    }
+    log(f"cleaning_rules_enabled={json.dumps(cleaning_rules_enabled, ensure_ascii=False)}")
+
     cleaned, quarantine = clean_rows(
         rows,
-        apply_refund_window_fix=not args.no_refund_fix,
+        apply_doc_id_allowlist=cleaning_rules_enabled["doc_id_allowlist"],
+        apply_effective_date_cleaning=cleaning_rules_enabled["effective_date_cleaning"],
+        apply_required_field_check=cleaning_rules_enabled["required_field_check"],
+        apply_hr_stale_filter=cleaning_rules_enabled["hr_stale_filter"],
+        apply_text_normalization=cleaning_rules_enabled["text_normalization"],
+        apply_chronology_check=cleaning_rules_enabled["chronology_check"],
+        apply_dedupe=cleaning_rules_enabled["dedupe"],
+        apply_refund_window_fix=cleaning_rules_enabled["refund_window_fix"],
     )
     cleaned_path = CLEAN_DIR / f"cleaned_{run_id.replace(':', '-')}.csv"
     quar_path = QUAR_DIR / f"quarantine_{run_id.replace(':', '-')}.csv"
@@ -111,7 +132,9 @@ def cmd_run(args: argparse.Namespace) -> int:
         "cleaned_records": len(cleaned),
         "quarantine_records": len(quarantine),
         "latest_exported_at": latest_exported,
-        "no_refund_fix": bool(args.no_refund_fix),
+        "cleaning_rules_enabled": cleaning_rules_enabled,
+        "no_cleaning_rules": bool(args.no_cleaning_rules),
+        "no_refund_fix": not cleaning_rules_enabled["refund_window_fix"],
         "skipped_validate": bool(args.skip_validate and halt),
         "cleaned_csv": str(cleaned_path.relative_to(ROOT)),
         "chroma_path": os.environ.get("CHROMA_DB_PATH", "./chroma_db"),
@@ -195,6 +218,46 @@ def main() -> int:
     p_run = sub.add_parser("run", help="ingest → clean → validate → embed")
     p_run.add_argument("--raw", default=str(RAW_DEFAULT), help="Đường dẫn CSV raw export")
     p_run.add_argument("--run-id", default="", help="ID run (mặc định: UTC timestamp)")
+    p_run.add_argument(
+        "--no-cleaning-rules",
+        action="store_true",
+        help="Tat tat ca cleaning rules co the bat/tat (dung cho inject/before).",
+    )
+    p_run.add_argument(
+        "--no-doc-allowlist",
+        action="store_true",
+        help="Khong quarantine doc_id ngoai allowlist.",
+    )
+    p_run.add_argument(
+        "--no-effective-date-cleaning",
+        action="store_true",
+        help="Khong chuan hoa/validate effective_date.",
+    )
+    p_run.add_argument(
+        "--no-required-field-check",
+        action="store_true",
+        help="Khong quarantine dong thieu effective_date hoac chunk_text.",
+    )
+    p_run.add_argument(
+        "--no-hr-stale-filter",
+        action="store_true",
+        help="Khong quarantine phien ban HR cu theo effective_date.",
+    )
+    p_run.add_argument(
+        "--no-text-normalization",
+        action="store_true",
+        help="Khong normalize HTML/whitespace/newline trong chunk_text.",
+    )
+    p_run.add_argument(
+        "--no-chronology-check",
+        action="store_true",
+        help="Khong quarantine khi exported_at nho hon effective_date.",
+    )
+    p_run.add_argument(
+        "--no-dedupe",
+        action="store_true",
+        help="Khong quarantine duplicate chunk_text.",
+    )
     p_run.add_argument(
         "--no-refund-fix",
         action="store_true",
