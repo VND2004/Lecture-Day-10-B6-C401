@@ -1,16 +1,19 @@
 chunk_id,doc_id,chunk_text,effective_date,exported_at
-11,shipping_policy_v2,"Thời gian giao hàng tiêu chuẩn là 3-5 ngày làm việc.",2026-03-01,2026-04-12T10:00:00
-12,shipping_policy_v2,Giao hàng siêu tốc trong 24h, áp dụng cho nội thành,2026-03-01,2026-04-12T10:00:00
-13,N/A,"Lỗi hệ thống khi cập nhật phí ship",NULL,2026-04-12T10:00:00
-14,SHIPPING_POLICY_V2 ,"  Phí ship ngoại thành là 50k ", 2026-03-01 ,     2026-04-12T10:00:00   
-15,return_policy,"Khách hàng chịu phí trả hàng",Quý 1 năm 2026,2026-04-12T10:00:00
-16,return_policy,"Hàng đổi trả phải:
-- Còn nguyên tem
-- Chưa qua sử dụng",2026-03-01,2026-04-12T10:00:00
-17,warranty_info,"Bảo hành 12 tháng cho lỗi nhà sản xuất.",2026-01-15,1712887200
-17,warranty_info,"Pin được bảo hành 6 tháng.",2026-01-15,2026-04-12T10:00:00+07:00
-19,doc_promo,"<p>Giảm 20% cho <b>đơn hàng đầu tiên</b>.</p>",2026-04-01,2026-04-12T10:00:00
-20,doc_promo,"Gim gi ln n 50% dp l.",2026-04-01,2026-04-12T10:00:00
-21,doc_extra,"Dữ liệu có số lượng cột nhiều hơn bình thường",2026-04-01,2026-04-12T10:00:00,ExtraInfo1,ExtraInfo2
-,doc_missing_id,"Dòng này bị thiếu chunk_id ở đầu",2026-04-01,2026-04-12T10:00:00
-23,doc_invalid_date,"Ngày phi logic",2026-02-30,2026-04-12T10:00:00
+1,policy_refund_v4,"Hoàn tiền áp dụng trong 7 ngày làm việc kể từ lúc xác nhận đơn.",2026-02-01,2026-04-15T08:00:00
+2,policy_refund_v4,"Yêu cầu hoàn tiền phải có mã ticket hợp lệ.",2026-02-30,2026-04-15T08:01:00
+3,sla_p1_2026,"P1: phản hồi 15 phút và cập nhật stakeholder mỗi 30 phút.",2026-01-15,2026/04/15 08:02:00
+4,access_control_sop,"Level 2 — Standard Access: phê duyệt bởi Line Manager + IT Admin, xử lý trong 2 ngày làm việc.",2026-01-01,
+5,hr_leave_policy,OK,2026-01-01,2026-04-15T08:04:00
+6,access_control_sop,"Escalation khẩn cấp: On-call IT Admin có thể cấp quyền tạm tối đa 24 giờ sau khi Tech Lead phê duyệt.",2026-01-01,2026-04-15T08:05:00
+7,sla_p1_2026,"Log tạm có lệnh: SELECT * FROM incidents WHERE severity='P1'; cần redaction trước publish.",2026-01-15,2026-04-15T08:06:00
+8,hr_leave_policy,"Nghỉ phép năm tiêu chuẩn là 12 ngày/năm.",2026-01-01,2025-12-31T23:59:59
+9,it_helpdesk_faq,"Mật khẩu phải đổi mỗi 90 ngày.",2026-01-20,3026-01-01T00:00:00
+10,access_control_sop,"Công cụ liên quan: Jira IT-ACCESS, Okta, Splunk, email it-access@company.internal.",2026-01-01,2026-04-15T08:09:00.123+07:00
+11,policy_refund_v4,"Store credit có thể đạt 110% giá trị đơn theo chương trình retention.",2026-02-01,1712887200
+12,it_helpdesk_faq,"<p>Q: Quên mật khẩu?</p>
+A: Truy cập <b>cổng SSO reset</b>.",2026-01-20,2026-04-15T08:11:00
+13,access_control_sop,"Access review định kỳ mỗi 6 tháng và báo cáo bất thường lên CISO trong 24 giờ.",2026-01-01,2026-04-15T08:12:00,ExtraInfo1,ExtraInfo2
+,hr_leave_policy,"Dòng này bị thiếu chunk_id ở đầu",2026-01-01,2026-04-15T08:13:00
+13,N/A,"Doc id placeholder không hợp lệ",2026-01-15,2026-04-15T08:14:00
+15,access_control_sop,"  Thu hồi quyền truy cập: nhân viên nghỉ việc phải thu hồi ngay trong ngày cuối.  ",Quý 1 năm 2026,2026-04-15T08:15:00
+16,sla_p1_2026,"Gim gi ln n 50% dp l.",2026-01-15,2026-04-15T08:16:00
